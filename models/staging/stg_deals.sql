@@ -2,7 +2,8 @@
     database='STAGING_DB',
     schema='DEALS',
     alias='DEALS',
-    materialized='view'
+    materialized='incremental',
+    unique_key='deal_id'
 ) }}
 
 SELECT 
@@ -18,6 +19,11 @@ TO_DATE(update_time, 'DD-MM-YYYY') AS DEAL_UPDATES_DATES,
 TO_DATE(close_time, 'DD-MM-YYYY') AS DEAL_CLOSING_DATE,
 deal_stage,
 won_by_person_id,
-lost_reason
+lost_reason,
+updated_at
 
 FROM RAW_DATA_DB.raw_data.DEALS
+
+{% if is_incremental() %}
+WHERE updated_at > (SELECT MAX(updated_at) from {{ this }})
+{% endif %}

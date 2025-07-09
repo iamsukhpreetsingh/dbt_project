@@ -1,8 +1,9 @@
 {{ config(
+    unique_key='employee_id',
     database='STAGING_DB',
     schema='EMPLOYEES',
     alias='EMPLOYEES',
-    materialized='view'
+    materialized='incremental'
 ) }}
 
 SELECT 
@@ -22,7 +23,12 @@ TO_DATE(hire_date, 'DD-MM-YYYY') AS hire_date,
 department,
 job_title,
 CAST(salary as DOUBLE) AS SALARY,
-status
+status,
+updated_at
 
 from RAW_DATA_DB.raw_data.EMPLOYEES
+
+{% if is_incremental() %}
+WHERE updated_at > (SELECT MAX(updated_at) from {{ this }})
+{% endif %}
 

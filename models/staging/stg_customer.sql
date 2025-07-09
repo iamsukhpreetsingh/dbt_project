@@ -2,7 +2,8 @@
     database='STAGING_DB',
     schema='CUSTOMERS',
     alias='CUSTOMERS',
-    materialized='view'
+    materialized='incremental',
+    unique_key='customer_id'
 ) }}
 
 SELECT 
@@ -23,7 +24,11 @@ city,
 state,
 CAST(zip_code AS NUMBER) AS zip_code,
 TO_DATE(REGISTRATION_DATE, 'DD-MM-YYYY') AS registration_date,
-customer_segment
+customer_segment,
+updated_at
 
 FROM RAW_DATA_DB.raw_data.customers
 
+{% if is_incremental() %}
+WHERE updated_at > (SELECT MAX(updated_at) from {{ this }})
+{% endif %}

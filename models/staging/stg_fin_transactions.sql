@@ -1,8 +1,9 @@
 {{ config(
+    materialized='incremental',
+    unique_key='transaction_id',
     database='STAGING_DB',
     schema='FININCIAL_TRANSACTIONS',
     alias='FININCIAL_TRANSACTIONS',
-    materialized='view'
 ) }}
 
 SELECT
@@ -14,6 +15,12 @@ currency,
 description,
 source_account,
 destination_account
-related_entity_id
+related_entity_id,
+updated_at
+
 FROM 
 RAW_DATA_DB.raw_data.FININCIAL_TRANSACTIONS
+
+{% if is_incremental() %}
+WHERE updated_at > (SELECT MAX(updated_at) from {{ this }})
+{% endif %}
