@@ -1,0 +1,23 @@
+version: 2
+
+models:
+  - name: customers
+    description: this is customers model
+    columns:
+      - name: customer_id
+        description: unique identifier for customers
+        tests:
+          - not_null
+          - unique
+
+
+      - name: registration_date
+        tests:
+          - not_null
+
+
+      - name: is_active
+        description: to check if customer is active
+        tests:
+          - accepted_values:
+              values: ['TRUE', 'FALSE']
